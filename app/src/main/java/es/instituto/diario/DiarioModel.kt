@@ -1,6 +1,8 @@
 package es.instituto.diario
 
 import android.content.Context
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -13,8 +15,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
+
 
 @Root(name = "entradas")
 class DiarioModel: ViewModel() {
@@ -25,7 +26,7 @@ class DiarioModel: ViewModel() {
         const val separator=";"
     }
     //atributos
-    @field:ElementList(inline = true, entry = "entrada")
+    @field:ElementList(inline = true , name = "entrada")
     private var elementos= mutableListOf<Entrada>()
     var item_selected: Entrada? =null
     val elements get()=elementos
@@ -38,7 +39,7 @@ class DiarioModel: ViewModel() {
             Extension.cvs -> {
                 val formatter = SimpleDateFormat("dd-MM-yyyy")
                 elementos.forEach{
-                    bw.write(" ${formatter.format(it.fecha)}${DiarioModel.separator} ${it.texto}${DiarioModel.separator}")
+                    bw.write(" ${formatter.format(it.fecha)}${DiarioModel.separator}${it.texto}")
                     bw.newLine()
                 }
             }
@@ -93,14 +94,15 @@ class DiarioModel: ViewModel() {
             }
             Extension.xml -> {
                 val serializer = Persister()
-                val entradas = serializer.read(Entrada::class.java, file)
-                this.elementos.clear()
-                this.elementos.addAll(listOf(entradas))
-
-
+                if (file.exists() && !file.isDirectory) {
+                    file.inputStream().bufferedReader().use { br ->
+                        val localXml = serializer.read(DiarioModel::class.java, br)
+                        this.elementos.clear()
+                        this.elementos.addAll(localXml.elementos)
+                    }
+                }
             }
         }
-
         br.close()
         fr.close()
 

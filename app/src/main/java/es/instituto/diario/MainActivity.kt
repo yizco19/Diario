@@ -43,11 +43,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             es.instituto.diario.R.id.todos -> {
-                val fm: FragmentManager = supportFragmentManager
-                fm.commit {
-                    replace(R.id.fragmentContainerView, ListadoFragment.newInstance())
-                    addToBackStack("replacement")
-                }
+                replaceListFragment()
 
                 true
             }
@@ -104,6 +100,14 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    fun replaceListFragment() {
+        val fm: FragmentManager = supportFragmentManager
+        fm.commit {
+            replace(R.id.fragmentContainerView, ListadoFragment.newInstance())
+            addToBackStack("replacement")
         }
     }
 }
